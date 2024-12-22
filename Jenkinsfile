@@ -20,7 +20,7 @@ pipeline{
                 sh 'sleep 5'
                 script{
                     def status = sh(script: "curl -sLI -w '%{http_code}' ${url} -o /dev/null", returnStdout: true).trim()
-                    if (status != "200" && status != "201") {
+                    if (status == "200" || status != "201") {
                         error("Returned status code = $status when calling ${url}")
                     }
                 }
