@@ -14,6 +14,11 @@ pipeline{
                 sh 'docker rmi -f $(docker images -aq)'
             }
         }
+        stage("connect to azure"){
+            steps{
+                sh 'az login --identity'
+            }
+        }
         stage("create docker"){
             steps{
                 sh "docker build ./webServer -t 'helloworld:${env.BUILD_ID}'"
