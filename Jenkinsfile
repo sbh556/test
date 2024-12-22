@@ -1,10 +1,16 @@
 pipeline{
     agent any
 
+    environment {
+        registryName = 'DanielAcrRegistry'
+    }
+
     stages {
-        stage("test1"){
+        stage("create docker"){
             steps{
-                sh 'ls'
+                ws("./webServer"){
+                    dockerImage = docker.build registryName
+                }
             }
         }
     }
