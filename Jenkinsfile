@@ -9,7 +9,9 @@ pipeline{
         stage("create docker"){
             steps{
                 ws("./webServer"){
-                    dockerImage = docker.build registryName
+                    script{
+                        def image = docker.build("helloworld:${env.BUILD_ID}")
+                    }
                 }
             }
         }
