@@ -6,9 +6,8 @@ pipeline{
     }
 
     stages {
-        stage("delete rogue previes containers and images"){
+        stage("delete rogue images"){
             steps{
-                sh 'docker rm -vf $(docker ps -aq)'
                 sh 'docker rmi -f $(docker images -aq)'
             }
         }
