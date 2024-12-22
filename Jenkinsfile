@@ -17,6 +17,7 @@ pipeline{
             steps{
                 sh "docker build ./webServer -t 'helloworld:${env.BUILD_ID}'"
                 sh "docker run -p 8000:8000 -d 'helloworld:${env.BUILD_ID}'"
+                sh 'sleep 5'
                 script{
                     def status = sh(script: "curl -sLI -w '%{http_code}' ${url} -o /dev/null", returnStdout: true).trim()
                     if (status != "200" && status != "201") {
