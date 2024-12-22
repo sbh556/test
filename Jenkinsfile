@@ -28,7 +28,7 @@ pipeline{
         }
         stage("push to acr"){
             steps{
-                withCredentials([usernamePassword(credentialsId:'acr',passwordVariable:'acrPassword',usernameVariable:'acrUsername')]){
+                withCredentials([usernamePassword(credentialsId:'ACR',passwordVariable:'acrPassword',usernameVariable:'acrUsername')]){
                     sh "docker login -u ${env.acrPassword} -p ${env.acrUsername}"
                 }
             }
