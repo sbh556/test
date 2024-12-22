@@ -1,0 +1,9 @@
+pipeline{
+    agent any
+
+    stages {
+        step("test1"){
+            sh 'ls'
+        }
+    }
+}
