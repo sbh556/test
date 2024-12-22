@@ -10,7 +10,7 @@ pipeline{
             steps{
                 ws("./webServer"){
                     script{
-                        def image = docker.build("helloworld:${env.BUILD_ID}")
+                        sh "docker build . -t 'helloworld:${env.BUILD_ID}'"
                     }
                 }
             }
