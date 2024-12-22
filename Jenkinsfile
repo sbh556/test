@@ -3,6 +3,7 @@ pipeline{
 
     environment {
         registryName = 'DanielAcrRegistry'
+        ACRLoginServer = 'danielacrregistry.azurecr.io'
         url = 'http://localhost:8000'
     }
 
@@ -29,7 +30,7 @@ pipeline{
         stage("push to acr"){
             steps{
                 withCredentials([usernamePassword(credentialsId:'ACR',passwordVariable:'acrPassword',usernameVariable:'acrUsername')]){
-                    sh "docker login -u ${env.acrPassword} -p ${env.acrUsername}"
+                    sh "docker login ${ACRLoginServer} -u ${env.acrPassword} -p ${env.acrUsername}"
                 }
             }
         }
