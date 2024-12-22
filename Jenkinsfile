@@ -10,6 +10,7 @@ pipeline{
             steps{
                 ws("./webServer"){
                     script{
+                        sh 'ls'
                         sh "docker build . -t 'helloworld:${env.BUILD_ID}'"
                     }
                 }
