@@ -129,7 +129,8 @@ resource "azurerm_linux_virtual_machine" "jenking-server" {
       "sudo apt-get install jenkins git-all docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y",
       "sudo usermod -a -G docker jenkins",
       "sudo systemctl restart jenkins",
-      "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash"
+      "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash",
+      "sudo snap install kubectl --classic"
     ]
   }
 }
@@ -176,6 +177,7 @@ resource "azurerm_public_ip" "aks-pip" {
   location            = var.Region
   allocation_method   = "Static"
 }
+
 
 resource "azurerm_dns_zone" "ingress-domain-name" {
   name                = "danielDomain.local"
@@ -224,7 +226,7 @@ resource "helm_release" "nginix_ingress" {
   depends_on = [kubernetes_namespace.nginix_ingress_namespace, azurerm_public_ip.aks-pip]
 }
 
-resource "kubernetes_horizontal_pod_autoscaler_v2" "example_hpa" {
+resource "kubernetes_horizontal_pod_autoscaler_v2" "nginx-hpa" {
   metadata {
     name      = "nginx-hpa"
     namespace = var.ngnix_namespace
@@ -283,6 +285,13 @@ resource "azurerm_role_assignment" "jenkinsToAcrPermission" {
   principal_id                     = azurerm_linux_virtual_machine.jenking-server.identity[0].principal_id
   role_definition_name             = "AcrPush"
   scope                            = azurerm_container_registry.acr.id
+  skip_service_principal_aad_check = true
+}
+
+resource "azurerm_role_assignment" "jenkinsToAksPermissions" {
+  principal_id                     = azurerm_linux_virtual_machine.jenking-server.identity[0].principal_id
+  role_definition_name             = "Azure Kubernetes Service Contributor Role"
+  scope                            = azurerm_kubernetes_cluster.Orca-Cluster.id
   skip_service_principal_aad_check = true
 }
 
