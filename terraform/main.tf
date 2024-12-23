@@ -207,21 +207,12 @@ resource "helm_release" "nginix_ingress" {
     name  = "controller.service.loadBalancerIP"
     value = azurerm_public_ip.aks-pip.ip_address
   }
-  set {
-    name  = "resources.requests.memory"
-    value = "200Mi"
-  }
-  set {
-    name  = "resources.requests.cpu"
-    value = "200m"
-  }
-  set {
-    name  = "resources.limits.cpu"
-    value = "500m"
-  }
-  set {
-    name  = "resources.limits.memory"
-    value = "500Mi"
+  dynamic "set" {
+    for_each = var.nginx_ingress_set
+    content {
+      name  = set.value.name
+      value = set.value.value
+    }
   }
   depends_on = [kubernetes_namespace.nginix_ingress_namespace, azurerm_public_ip.aks-pip]
 }

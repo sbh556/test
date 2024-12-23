@@ -1,44 +1,44 @@
 variable "resource_group" {
-  type = string
+  type    = string
   default = "Daniel-Candidate"
 }
 
 variable "Region" {
-  type = string
+  type    = string
   default = "westeurope"
 }
 
 variable "Vm_username" {
-  type = string
+  type    = string
   default = "Daniel"
 }
 
 variable "vm_password" {
-  type = string
+  type      = string
   sensitive = true
-  default = "123QWEasd"
+  default   = "123QWEasd"
 }
 
 variable "ngnix_namespace" {
-  type = string
+  type    = string
   default = "nginx-namespace"
 }
 
 variable "ttl" {
-  type = number
+  type    = number
   default = 3600
 }
 
 variable "securityRules" {
   type = list(object({
-    name = string
-    protocol = string
-    source_port_range = string
-    destination_port_range =string
-    access = string
-    priority = number
-    direction = string
-    source_address_prefix = string
+    name                       = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    access                     = string
+    priority                   = number
+    direction                  = string
+    source_address_prefix      = string
     destination_address_prefix = string
   }))
   default = [
@@ -47,7 +47,7 @@ variable "securityRules" {
       priority                   = 1001
       direction                  = "Inbound"
       access                     = "Allow"
-      protocol = "*"
+      protocol                   = "*"
       source_port_range          = "*"
       destination_port_range     = "80"
       source_address_prefix      = "*"
@@ -58,7 +58,7 @@ variable "securityRules" {
       priority                   = 1002
       direction                  = "Inbound"
       access                     = "Allow"
-      protocol = "*"
+      protocol                   = "*"
       source_port_range          = "*"
       destination_port_range     = "443"
       source_address_prefix      = "*"
@@ -69,22 +69,47 @@ variable "securityRules" {
       priority                   = 1003
       direction                  = "Inbound"
       access                     = "Allow"
-      protocol = "*"
+      protocol                   = "*"
       source_port_range          = "*"
       destination_port_range     = "22"
       source_address_prefix      = "*"
       destination_address_prefix = "*"
     },
-        {
+    {
       name                       = "allowJenkins-Inbound"
       priority                   = 1004
       direction                  = "Inbound"
       access                     = "Allow"
-      protocol = "*"
+      protocol                   = "*"
       source_port_range          = "*"
       destination_port_range     = "8080"
       source_address_prefix      = "*"
       destination_address_prefix = "*"
+    }
+  ]
+}
+
+variable "nginx_ingress_set" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = [
+    {
+      name  = "resources.requests.memory"
+      value = "200Mi"
+    },
+    {
+      name  = "resources.requests.cpu"
+      value = "200m"
+    },
+    {
+      name  = "resources.limits.cpu"
+      value = "500m"
+    },
+    {
+      name  = "resources.limits.memory"
+      value = "500Mi"
     }
   ]
 }
