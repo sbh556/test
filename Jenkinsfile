@@ -15,7 +15,7 @@ pipeline{
         stage("delete rogue images"){
             steps{
                 sh  'docker rm -vf $(docker ps -aq) || true' 
-                sh 'docker rmi -f $(docker images -aq)'
+                sh 'docker rmi -f $(docker images -aq) || true'
             }
         }
         stage("connect to azure"){
