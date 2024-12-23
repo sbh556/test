@@ -12,12 +12,6 @@ pipeline{
     }
 
     stages {
-        stage("delete rogue images"){
-            steps{
-                sh  'docker rm -vf $(docker ps -aq) || true' 
-                sh 'docker rmi -f $(docker images -aq) || true'
-            }
-        }
         stage("connect to azure"){
             steps{
                 sh 'az login --identity'
@@ -47,6 +41,12 @@ pipeline{
                 sh "az account set --subscription ${subscription}"
                 sh "az aks get-credentials --resource-group ${rg} --name ${clusterName} --overwrite-existing"
                 sh "kubectl apply -f ./deployments"
+            }
+        }
+        stage("delete rogue images"){
+            steps{
+                sh  'docker rm -vf $(docker ps -aq) || true' 
+                sh 'docker rmi -f $(docker images -aq) || true'
             }
         }
     }
