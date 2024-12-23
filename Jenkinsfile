@@ -23,7 +23,7 @@ pipeline{
         stage("create docker"){
             steps{
                 sh "docker build ./webServer -t '${ACRLoginServer}/${dockerName}:latest'"
-                sh "docker run -p 8000:8000 -d '${ACRLoginServer}/${dockerName}:latest"
+                sh "docker run -p 8000:8000 -d '${ACRLoginServer}/${dockerName}:latest'"
                 sh 'sleep 5'
                 script{
                     def status = sh(script: "curl -sLI -w '%{http_code}' ${url} -o /dev/null", returnStdout: true).trim()
