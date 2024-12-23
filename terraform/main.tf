@@ -78,6 +78,10 @@ resource "azurerm_linux_virtual_machine" "jenking-server" {
     azurerm_network_interface.vm-nic.id
   ]
 
+  identity {
+    type = "SystemAssigned"
+  }
+
 
   admin_ssh_key {
     username   = var.Vm_username
@@ -122,7 +126,10 @@ resource "azurerm_linux_virtual_machine" "jenking-server" {
       "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
       "sudo apt-get update",
       "sudo apt install fontconfig openjdk-17-jre -y",
-      "sudo apt-get install jenkins git-all docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y"
+      "sudo apt-get install jenkins git-all docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y",
+      "sudo usermod -a -G docker jenkins",
+      "sudo systemctl restart jenkins",
+      "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash"
     ]
   }
 }
@@ -198,20 +205,36 @@ resource "helm_release" "nginix_ingress" {
     name  = "controller.service.loadBalancerIP"
     value = azurerm_public_ip.aks-pip.ip_address
   }
+  set {
+    name  = "resources.requests.memory"
+    value = "200Mi"
+  }
+  set {
+    name  = "resources.requests.cpu"
+    value = "200m"
+  }
+  set {
+    name  = "resources.limits.cpu"
+    value = "500m"
+  }
+  set {
+    name  = "resources.limits.memory"
+    value = "500Mi"
+  }
   depends_on = [kubernetes_namespace.nginix_ingress_namespace, azurerm_public_ip.aks-pip]
 }
 
 resource "kubernetes_horizontal_pod_autoscaler_v2" "example_hpa" {
   metadata {
-    name      = "example-hpa"
-    namespace = "default"
+    name      = "nginx-hpa"
+    namespace = var.ngnix_namespace
   }
 
   spec {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = helm_release.nginix_ingress.name
+      name        = "nginx-ingress-ingress-nginx-controller"
     }
 
     min_replicas = 2
@@ -246,12 +269,20 @@ resource "azurerm_container_registry" "acr" {
   location            = var.Region
   resource_group_name = var.resource_group
   sku                 = "Basic"
-  admin_enabled       = false
+  admin_enabled       = true
 }
 
-resource "azurerm_role_assignment" "example" {
+resource "azurerm_role_assignment" "aksToAcrPermissions" {
   principal_id                     = azurerm_kubernetes_cluster.Orca-Cluster.kubelet_identity[0].object_id
   role_definition_name             = "AcrPull"
   scope                            = azurerm_container_registry.acr.id
   skip_service_principal_aad_check = true
 }
+
+resource "azurerm_role_assignment" "jenkinsToAcrPermission" {
+  principal_id                     = azurerm_linux_virtual_machine.jenking-server.identity[0].principal_id
+  role_definition_name             = "AcrPush"
+  scope                            = azurerm_container_registry.acr.id
+  skip_service_principal_aad_check = true
+}
+
