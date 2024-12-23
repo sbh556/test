@@ -6,6 +6,9 @@ pipeline{
         ACRLoginServer = 'danielacrregistry.azurecr.io'
         dockerName = "helloworld"
         url = 'http://localhost:8000'
+        subscription = "2fa0e512-f70e-430f-9186-1b06543a848e"
+        rg = "Daniel-Candidate"
+        clusterName = "Orca-Cluster"
     }
 
     stages {
@@ -38,6 +41,11 @@ pipeline{
                     sh "az acr login -n ${registryName}"
                     sh "docker push ${ACRLoginServer}/${dockerName}:latest"
             }
+        }
+        stage("update aks"){
+            sh "az account set --subscription ${subscription}"
+            sh "az aks get-credentials --resource-group ${rg} --name ${clusterName} --overwrite-existing"
+            sh "kubectl apply -f ./deployments"
         }
     }
 }
