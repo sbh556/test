@@ -43,9 +43,11 @@ pipeline{
             }
         }
         stage("update aks"){
-            sh "az account set --subscription ${subscription}"
-            sh "az aks get-credentials --resource-group ${rg} --name ${clusterName} --overwrite-existing"
-            sh "kubectl apply -f ./deployments"
+            steps {
+                sh "az account set --subscription ${subscription}"
+                sh "az aks get-credentials --resource-group ${rg} --name ${clusterName} --overwrite-existing"
+                sh "kubectl apply -f ./deployments"
+            }
         }
     }
 }
